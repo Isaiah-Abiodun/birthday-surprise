@@ -1,1 +1,128 @@
-index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            overflow: hidden;
+        }
+        #container {
+            text-align: center;
+        }
+        #countdown {
+            font-size: 4em;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 0;
+            display: block;
+        }
+        #surprise {
+            display: none;
+            font-size: 2em;
+            color: #4ecdc4;
+        }
+        #gif {
+            display: none;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        #greeting {
+            display: none;
+            font-size: 1.5em;
+            color: #45b7d1;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <h1 id="countdown">3</h1>
+        <h2 id="surprise">Surprise!</h2>
+        <img id="gif" src="birthday.gif.gif" alt="Birthday GIF">
+        <p id="greeting">Happy Birthday, Ibukun Bailey Rebecca!</p>
+    </div>
+
+    <script>
+        // Web Audio API for sound effects
+        let audioContext;
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(frequency, duration = 0.5, type = 'sine') {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCountdownSound(count) {
+            let freq;
+            if (count === 3) freq = 800;
+            else if (count === 2) freq = 600;
+            else if (count === 1) freq = 400;
+            playTone(freq, 0.4);
+        }
+
+        function playSurpriseSound() {
+            // Play a short fanfare: two quick high notes
+            playTone(800, 0.2);
+            setTimeout(() => playTone(1000, 0.3), 200);
+        }
+
+        let count = 3;
+        const countdownEl = document.getElementById('countdown');
+        const surpriseEl = document.getElementById('surprise');
+        const gifEl = document.getElementById('gif');
+        const greetingEl = document.getElementById('greeting');
+
+        const timer = setInterval(() => {
+            countdownEl.textContent = count;
+            playCountdownSound(count); // Play sound for each countdown
+            count--;
+
+            if (count < 0) {
+                clearInterval(timer);
+                countdownEl.style.display = 'none';
+                surpriseEl.style.display = 'block';
+                playSurpriseSound(); // Play surprise sound
+
+                // Trigger confetti animation
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                // Show GIF and greeting after a short delay
+                setTimeout(() => {
+                    gifEl.style.display = 'block';
+                    greetingEl.style.display = 'block';
+                }, 2000); // 2 seconds after confetti starts
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
+
+
+
